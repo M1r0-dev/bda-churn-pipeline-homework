@@ -86,3 +86,12 @@
 - Independent review: Standards two Critical initially, both confirmed/fixed/regression-tested; fresh Standards re-review PASS and Spec core/tests PASS, без открытых findings в этих scopes. Документация будет проверена отдельно.
 - decision: keep refactoring (эквивалентность и инженерная воспроизводимость подтверждены, улучшение качества не заявляется).
 - next: закончить документацию, пройти публикационный аудит и опубликовать репозиторий.
+
+## 2026-11-20 — publication result
+- commit: 1a938395c8adc6470ccaf54a5e7b1aa577fb65de (clean functional snapshot published to main); source/config/data SHA неизменны. После этого добавлена только запись публикации, не модель/настройки/данные.
+- final review: свежие независимые Standards и Spec по документации PASS, без открытых замечаний. Lead independently проверил60doclinks, точный HTML SHA, strict provenance check и browser-check (exit0); визуальная perceptual оценка не заявляется.
+- prepublication suite:61tests/22.396s OK, exit0; pip check0. Audit:25trackedfiles,12,293,495bytes на этом снимке; credential signatures0, generated/private paths0, файлов>20MB нет; авторский email уже присутствует в существующих публичных GitHub-коммитах (значение не публикуется в отчёте).
+- publication: https://github.com/M1r0-dev/bda-churn-pipeline-homework ; gh repo create --public exit0; ff merge и git push -u origin main exit0, безforce. GitHub REST подтвердил public/defaultmain, тот же HEAD и SHA всех25remote blobs. Анонимный web GET репозитория вернул HTTP200.
+- clean local Git clone:61tests/21.063s OK; actual clone с публичного GitHub HTTPS URL:61tests/21.310s OK (exit0), commit1a938395c8adc6470ccaf54a5e7b1aa577fb65de. Оба запуска без исходного локального notebook и без локальных scratch baseline arrays. Использовано то же pinned Python окружение; чистая установка независимо проверена Docker-сборкой.
+- environment failures: отдельные GitHub REST/GraphQL GET однажды завершались TLS/i-o timeout; повторные ограниченные чтения прошли. Никакой недоступный GET не выдавался за успешную проверку; push и remote tree проверены фактически.
+- decision: keep, инженерная цель выполнена для сохранённой ретроспективной постановки; next: при необходимости будущего прогноза сначала определить новый целевой временной интервал, не использовать эти метрики как future-churn оценку.

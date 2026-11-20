@@ -188,5 +188,17 @@
     "exit_code": 0,
     "compileall_exit_code": 0,
     "pip_check_exit_code": 0
+  },
+  "publication": {
+    "url": "https://github.com/M1r0-dev/bda-churn-pipeline-homework",
+    "visibility": "public",
+    "default_branch": "main",
+    "functional_snapshot_verified": "1a938395c8adc6470ccaf54a5e7b1aa577fb65de",
+    "all_25_remote_blob_ids_matched_local_git_tree": true,
+    "anonymous_web_http_status": 200,
+    "actual_public_https_clone_suite_tests": 61,
+    "actual_public_https_clone_suite_exit_code": 0,
+    "force_push_used": false,
+    "note": "Publication receipt and final report were added after the verified functional snapshot; pipeline, config and input bytes unchanged."
   }
 }

@@ -1,6 +1,6 @@
 # Архитектура конвейера
 
-[Интерактивная standalone-схема](<architecture.html>) создана archify по committed-коду `49314d8068005fb70fddf411741f77e72bb81651`. Содержание русское; элементы интерфейса viewer используют английский fallback. Автоматические validation/delivery/check/browser-check пройдены; perceptual visual review не выполнялся. Вспомогательные candidate/receipts остаются в игнорируемом scratch, не входят в публичную поставку. URL в metadata — identity планируемого репозитория, не свидетельство публикации.
+[Интерактивная standalone-схема](<architecture.html>) создана archify по committed-коду `49314d8068005fb70fddf411741f77e72bb81651`. Содержание русское; элементы интерфейса viewer используют английский fallback. Автоматические validation/delivery/check/browser-check пройдены; perceptual visual review не выполнялся. Вспомогательные candidate/receipts остаются в игнорируемом scratch, не входят в публичную поставку. URL в metadata — identity публичного репозитория; сами metadata не являются доказательством публикации.
 
 ## Слои и потоки
 
