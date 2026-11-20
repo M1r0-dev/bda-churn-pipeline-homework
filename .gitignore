@@ -1,0 +1,16 @@
+# Original local notebook and outputs are retained, never published.
+InnopolisBigData6_1.ipynb
+project_6.1/
+processed/
+artifacts/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.scratch/
+.env
+.env.*
+*.log
+*.pkl
+*.joblib
+.DS_Store
