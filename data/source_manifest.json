@@ -1,0 +1,18 @@
+{
+  "churn_features.parquet": {
+    "sha256": "769b2b7627315f62fd85cfc0f05bcc40f4543b7adab8dd5ba01248a392b1b222",
+    "bytes": 6893349,
+    "source": "../hw5/processed/churn_features.parquet"
+  },
+  "churn_truth.csv": {
+    "sha256": "20e8d860b8a21dcb71de11c5ddff8eb771f196749d6785fbc5c2db095b246058",
+    "bytes": 4378383,
+    "source": "../hw4/tdg_data_S_20260827/reference/churn_truth.csv"
+  },
+  "notebook_source": {
+    "local_source": "InnopolisBigData6_1.ipynb",
+    "sha256": "5dbb9f59e43dfeacf19091bacf8224dc197753214cddd7ecd9b5406f4afe48be",
+    "archive": "provenance/original_functions.py",
+    "functions": 8
+  }
+}

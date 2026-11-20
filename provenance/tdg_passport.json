@@ -1,0 +1,38 @@
+{
+  "broken_day_index": 66,
+  "drift_start_fraction": 0.6666666666666666,
+  "generator_version": "1.0.0",
+  "leakage_field": "tickets.retention_contact",
+  "leakage_note": "Признак проставляется постфактум и почти совпадает с оттоком; прямое включение в модель даёт неправдоподобно высокое качество.",
+  "level": "S",
+  "missing_day_indices": [
+    37,
+    49,
+    71
+  ],
+  "new_tariff": "T51",
+  "nodes": 45000,
+  "period_days": 90,
+  "period_start": "2025-10-01",
+  "regions": 90,
+  "rows": {
+    "cdr": 9292986,
+    "telemetry": 1849246,
+    "tickets": 138781
+  },
+  "seed": 20260827,
+  "skew_profile": {
+    "subscribers_above_1pct": 7,
+    "top_0_1pct_subscriber_share": 0.3519,
+    "top_1pct_node_share": 0.45,
+    "top_2_region_share": 0.3
+  },
+  "spike_days": [
+    26,
+    43,
+    49
+  ],
+  "subscribers": 200000,
+  "subscribers_seen": 198598,
+  "tariffs": 51
+}
