@@ -14,3 +14,15 @@ __pycache__/
 *.pkl
 *.joblib
 .DS_Store
+# Local credentials and private key material
+credentials*
+secrets*
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+.kaggle/
+.aws/
+.ssh/
+.coverage
+htmlcov/
