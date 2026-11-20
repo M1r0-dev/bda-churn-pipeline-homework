@@ -1,6 +1,6 @@
 {
   "verification_date": "2026-11-20",
-  "scope": "Lead local full-data acceptance; Docker receipt recorded separately",
+  "scope": "Lead full-data local and Docker acceptance plus independent verifier container reruns",
   "commit_at_run": "305811fafc035ffde14bcfabbf327ac8c0764f79",
   "working_tree_dirty": true,
   "python": "3.11.18",
@@ -151,5 +151,42 @@
     "Retrospective churned classification, not future churn prediction",
     "One training seed, no generalization uncertainty estimate",
     "Per-file atomic replacement, not transactional set or concurrent writers"
-  ]
+  ],
+  "docker": {
+    "build_command": "docker build --progress=plain -t churn-homework:local .",
+    "build_exit_code": 0,
+    "lead_run_command": "docker run --rm --user \"$(id -u):$(id -g)\" -v \"$PWD/.scratch/lead-docker-artifacts:/app/artifacts\" churn-homework:local",
+    "lead_run_exit_code": 0,
+    "lead_image_id": "sha256:9b909dc15318192d3b881d14eeac2e911d7f8a0ee639d629e3f36f09e0dc349e",
+    "source_commit": "49314d8068005fb70fddf411741f77e72bb81651",
+    "source_sha256": "707aeec7b0f7a8d4cea1c35dce511f39f71dda138eb15522a2505e0e7e465aea",
+    "dockerfile_sha256": "d09e7e88173ed06dfdb3dff4c1459060aa08e220e2e86f0ae3bf51c6a48d0232",
+    "artifact_sha256": {
+      "model.joblib": "323c15d9832ee7652685f4bff9830f29bfaaeef06b0fd20e92ab94023d5c8471",
+      "features.json": "ee0c371a601c8b5741d15c182164899eb175a29f468448c38aea02f7b2c87914",
+      "metrics.json": "d0f2998ac776dfdd7498387cbdd1ce959f75cac0af1c75576d25d159800a765a",
+      "manifest.json": "7546b5e3afb3dbf4fe297448f346ce10a3516e0c5826c4e6f1b7855a45170cdf",
+      "splits.csv": "9b07d8aff0412156a3f4f13d1aaa00cced3f88644daaf2ad8ff808fbc80539bd"
+    },
+    "all_five_match_local_and_verifier_runs": true,
+    "lead_loaded_predictions_checked": 100,
+    "host_files_owned_by_invoking_user": true,
+    "verifier_consecutive_container_run_exit_codes": [
+      0,
+      0
+    ],
+    "verifier_container_suite": {
+      "tests": 61,
+      "exit_code": 0
+    },
+    "platform": "linux/amd64",
+    "note": "BuildKit attestations may change image IDs between cached builds; artifact SHA-256 identity is the measured reproducibility criterion."
+  },
+  "local_suite": {
+    "command": "python -m unittest discover -s tests -v",
+    "tests": 61,
+    "exit_code": 0,
+    "compileall_exit_code": 0,
+    "pip_check_exit_code": 0
+  }
 }
