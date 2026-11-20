@@ -68,3 +68,11 @@
 ```
 - criterion: F1 baseline delta≤1e-8; вероятности loaded Pipeline vs baseline atol1e-12; одинаковые SHA пяти выходных артефактов между двумя CLI запусками; log mode=w, без накопления файлов.
 - decision: keep fixed config, без подбора по test; next: Lead запускает .scratch/verify_local.py и полный unittest.
+
+## 2026-11-20 — review fixes / final acceptance start
+- commit: 305811fafc035ffde14bcfabbf327ac8c0764f79 (dirty fixes); pipeline_sha256=707aeec7b0f7a8d4cea1c35dce511f39f71dda138eb15522a2505e0e7e465aea. Config/data/seed/hardware не менялись; полный config выше, SHA=b89009d9af08704e10ee6a305a65a2d8741741c66182b562d5f776d09e2a0f6b.
+- Первый Lead suite59 и два CLI прошли, но real-dataset test писал в рабочую artifacts. Исправлена изоляция теста: только TemporaryDirectory, и последовательный CLI повторён после окончания suite. Результаты того proof исторические; финальный proof будет заново после review fixes.
+- Независимый Standards review нашёл два edge-case дефекта. Оба воспроизведены regression tests (оба red exit1): nullable Float64/Int64 с pd.NA падали в passthrough selector; log hardlink к входному CSV позволял truncate input. Исправлены кастом НЕ классом, а стандартным FunctionTransformer(DataFrame.astype,float64) внутри ColumnTransformer и проверкой Path.samefile до открытия логов. Оба targeted tests после исправления green exit0.
+- Public baseline_metrics.json содержит реально воспроизведённые значения исходных функций; проверка метрик теперь обязательна и на fresh clone, не зависит от локального .scratch.
+- Docker historical build был успешен, но запуск uid1000 выявил COPY permissions0600; verifier исправил COPY --chmod=644, historical два запуска exit0. Финальная сборка/запуск будут повторены с исправленным ML-кодом; старый образ не выдаётся за финальную проверку.
+- decision: keep fixed original model config; next: full suite и два последовательных CLI на исправленном коде, затем final Docker rebuild и повторный review.

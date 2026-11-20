@@ -311,6 +311,10 @@ def _validate_output_paths(config: dict) -> dict:
     resolved_outputs = [path.resolve() for path in outputs.values()]
     if len(set(resolved_outputs)) != len(resolved_outputs):
         raise ValueError(f"Выходные файлы конвейера совпадают: {[str(p) for p in outputs.values()]}")
+    for index, first in enumerate(resolved_outputs):
+        for second in resolved_outputs[index + 1:]:
+            if first.exists() and second.exists() and first.samefile(second):
+                raise ValueError(f"Выходные файлы совпадают (hardlink): {first}, {second}")
     inputs = {
         "features": _resolve_path(config, config["data"]["features_path"]),
         "churn": _resolve_path(config, config["data"]["churn_path"]),
@@ -319,7 +323,9 @@ def _validate_output_paths(config: dict) -> dict:
     }
     for output_name, output_path in outputs.items():
         for input_name, input_path in inputs.items():
-            if output_path.resolve() == input_path.resolve():
+            if (output_path.resolve() == input_path.resolve()
+                    or (output_path.exists() and input_path.exists()
+                        and output_path.samefile(input_path))):
                 raise ValueError(
                     f"Выходной файл '{output_name}' ({output_path}) совпадает "
                     f"с входным '{input_name}' — запись уничтожила бы данные"
@@ -549,7 +555,11 @@ def _build_pipeline(config: dict) -> Pipeline:
             (
                 "select_features",
                 ColumnTransformer(
-                    transformers=[("features", "passthrough", list(FEATURE_COLUMNS))],
+                    transformers=[(
+                        "features",
+                        FunctionTransformer(pd.DataFrame.astype, kw_args={"dtype": "float64"}),
+                        list(FEATURE_COLUMNS),
+                    )],
                     remainder="drop",
                     verbose_feature_names_out=False,
                 ),
@@ -741,7 +751,7 @@ def _build_manifest(
             "params": dict(config["model"]),
             "threshold": metrics["threshold"],
             "preprocessing": [
-                "ColumnTransformer: выбор whitelist по именам, remainder=drop",
+                "ColumnTransformer: whitelist по именам, float64 cast, remainder=drop",
                 "FunctionTransformer(nan_to_num): +-inf -> NaN",
                 "SimpleImputer(constant fill_value)",
                 "StandardScaler",

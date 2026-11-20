@@ -1,0 +1,21 @@
+{
+  "source": "Actual execution of original_functions.py extracted from the original local notebook",
+  "source_commit": "53bdc9c1cdea87d8a9336c312ed6b9177a67863f",
+  "python": "3.11.18",
+  "scikit_learn": "1.6.1",
+  "seed": 42,
+  "features_sha256": "769b2b7627315f62fd85cfc0f05bcc40f4543b7adab8dd5ba01248a392b1b222",
+  "churn_sha256": "20e8d860b8a21dcb71de11c5ddff8eb771f196749d6785fbc5c2db095b246058",
+  "metrics": {
+    "val_auc": 0.9689088149805355,
+    "val_f1": 0.6778992651012726,
+    "val_precision": 0.5368346344925479,
+    "val_recall": 0.9195234621930465,
+    "test_auc": 0.9695817244936411,
+    "test_f1": 0.6883493386483058,
+    "test_precision": 0.5485128501299451,
+    "test_recall": 0.9238813229571985
+  },
+  "split_rows": [119146, 39716, 39716],
+  "scope": "Retrospective churned classification, not future churn prediction"
+}

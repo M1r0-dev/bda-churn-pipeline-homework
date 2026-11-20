@@ -3,7 +3,7 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 COPY requirements.txt .
 RUN python -m pip install --no-cache-dir --only-binary=:all: -r requirements.txt
-COPY pipeline.py config.json ./
+COPY --chmod=644 pipeline.py config.json ./
 COPY data/ ./data/
 RUN mkdir -p /app/artifacts
 CMD ["python", "pipeline.py", "--config", "config.json"]

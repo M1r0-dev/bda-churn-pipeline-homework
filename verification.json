@@ -1,0 +1,155 @@
+{
+  "verification_date": "2026-11-20",
+  "scope": "Lead local full-data acceptance; Docker receipt recorded separately",
+  "commit_at_run": "305811fafc035ffde14bcfabbf327ac8c0764f79",
+  "working_tree_dirty": true,
+  "python": "3.11.18",
+  "platform": "x86_64",
+  "packages": {
+    "numpy": "2.1.3",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.6.1",
+    "pyarrow": "24.0.0",
+    "joblib": "1.4.2",
+    "scipy": "1.15.3"
+  },
+  "pipeline_sha256": "707aeec7b0f7a8d4cea1c35dce511f39f71dda138eb15522a2505e0e7e465aea",
+  "config_sha256": "b89009d9af08704e10ee6a305a65a2d8741741c66182b562d5f776d09e2a0f6b",
+  "runs": [
+    {
+      "number": 1,
+      "exit_code": 0,
+      "metrics": {
+        "threshold": 0.5,
+        "val_auc": 0.9689088149805355,
+        "val_f1": 0.6778992651012726,
+        "val_precision": 0.5368346344925479,
+        "val_recall": 0.9195234621930465,
+        "test_auc": 0.9695817244936411,
+        "test_f1": 0.6883493386483058,
+        "test_precision": 0.5485128501299451,
+        "test_recall": 0.9238813229571985
+      },
+      "artifacts": {
+        "model.joblib": {
+          "sha256": "323c15d9832ee7652685f4bff9830f29bfaaeef06b0fd20e92ab94023d5c8471",
+          "bytes": 2737396,
+          "mtime_ns": 1795175016826474374
+        },
+        "features.json": {
+          "sha256": "ee0c371a601c8b5741d15c182164899eb175a29f468448c38aea02f7b2c87914",
+          "bytes": 221,
+          "mtime_ns": 1795175016833138115
+        },
+        "metrics.json": {
+          "sha256": "d0f2998ac776dfdd7498387cbdd1ce959f75cac0af1c75576d25d159800a765a",
+          "bytes": 307,
+          "mtime_ns": 1795175017695025561
+        },
+        "manifest.json": {
+          "sha256": "7546b5e3afb3dbf4fe297448f346ce10a3516e0c5826c4e6f1b7855a45170cdf",
+          "bytes": 2370,
+          "mtime_ns": 1795175017714191443
+        },
+        "splits.csv": {
+          "sha256": "9b07d8aff0412156a3f4f13d1aaa00cced3f88644daaf2ad8ff808fbc80539bd",
+          "bytes": 3653855,
+          "mtime_ns": 1795175016965137856
+        }
+      },
+      "files": [
+        "features.json",
+        "manifest.json",
+        "metrics.json",
+        "model.joblib",
+        "pipeline.log",
+        "splits.csv"
+      ]
+    },
+    {
+      "number": 2,
+      "exit_code": 0,
+      "metrics": {
+        "threshold": 0.5,
+        "val_auc": 0.9689088149805355,
+        "val_f1": 0.6778992651012726,
+        "val_precision": 0.5368346344925479,
+        "val_recall": 0.9195234621930465,
+        "test_auc": 0.9695817244936411,
+        "test_f1": 0.6883493386483058,
+        "test_precision": 0.5485128501299451,
+        "test_recall": 0.9238813229571985
+      },
+      "artifacts": {
+        "model.joblib": {
+          "sha256": "323c15d9832ee7652685f4bff9830f29bfaaeef06b0fd20e92ab94023d5c8471",
+          "bytes": 2737396,
+          "mtime_ns": 1795175025994088310
+        },
+        "features.json": {
+          "sha256": "ee0c371a601c8b5741d15c182164899eb175a29f468448c38aea02f7b2c87914",
+          "bytes": 221,
+          "mtime_ns": 1795175026002048636
+        },
+        "metrics.json": {
+          "sha256": "d0f2998ac776dfdd7498387cbdd1ce959f75cac0af1c75576d25d159800a765a",
+          "bytes": 307,
+          "mtime_ns": 1795175026823146384
+        },
+        "manifest.json": {
+          "sha256": "7546b5e3afb3dbf4fe297448f346ce10a3516e0c5826c4e6f1b7855a45170cdf",
+          "bytes": 2370,
+          "mtime_ns": 1795175026842189764
+        },
+        "splits.csv": {
+          "sha256": "9b07d8aff0412156a3f4f13d1aaa00cced3f88644daaf2ad8ff808fbc80539bd",
+          "bytes": 3653855,
+          "mtime_ns": 1795175026138270944
+        }
+      },
+      "files": [
+        "features.json",
+        "manifest.json",
+        "metrics.json",
+        "model.joblib",
+        "pipeline.log",
+        "splits.csv"
+      ]
+    }
+  ],
+  "stable_artifact_hashes_equal": true,
+  "log_excluded_from_hash_comparison": true,
+  "reload_predictions_checked": 39716,
+  "reload_matches_baseline_atol": 1e-12,
+  "baseline_metrics": {
+    "val_auc": 0.9689088149805355,
+    "val_f1": 0.6778992651012726,
+    "val_precision": 0.5368346344925479,
+    "val_recall": 0.9195234621930465,
+    "test_auc": 0.9695817244936411,
+    "test_f1": 0.6883493386483058,
+    "test_precision": 0.5485128501299451,
+    "test_recall": 0.9238813229571985
+  },
+  "baseline_metric_tolerance": 1e-08,
+  "reordered_columns_and_extra_target_fields_safe": true,
+  "sanity": {
+    "shuffled_train_labels_real_validation_auc": 0.6365931677095619,
+    "independent_shuffled_train_and_validation_labels_auc": 0.49850400661005273,
+    "changed_train_labels": 22126,
+    "validation_probability_min": 0.0124019567669303,
+    "validation_probability_max": 0.5733393551476119,
+    "majority_negative_validation_f1": 0.0,
+    "constant_score_validation_auc": 0.5,
+    "train_shuffle_seed": 42,
+    "val_shuffle_seed": 43,
+    "split_key_overlap": 0,
+    "used_for_model_selection": false,
+    "note": "Single shuffled-train run against real validation labels is not a calibrated null for strongly feature-dependent labels. Independent validation permutation provides the chance sanity check."
+  },
+  "limitations": [
+    "Retrospective churned classification, not future churn prediction",
+    "One training seed, no generalization uncertainty estimate",
+    "Per-file atomic replacement, not transactional set or concurrent writers"
+  ]
+}
