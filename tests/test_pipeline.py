@@ -33,18 +33,9 @@ import pipeline  # noqa: E402
 KEY = "subscriber_key"
 TARGET = "churned"
 LEAKY = "churn_day_index"
-FEATURE_COLUMNS = [
-    "traffic_gb_30d",
-    "traffic_change_ratio",
-    "voice_minutes_30d",
-    "events_30d",
-    "active_days_30d",
-    "recency_days",
-    "roaming_share_30d",
-    "tickets_30d",
-    "unresolved_share_30d",
-    "network_error_rate_30d",
-]
+FEATURE_COLUMNS = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))[
+    "data"
+]["feature_columns"]
 ARTIFACT_NAMES = [
     "model.joblib",
     "features.json",
@@ -259,9 +250,15 @@ class TestConfigValidation(PipelineFixture):
 
     def test_invalid_feature_whitelist_rejected(self) -> None:
         mutations = (
-            lambda c: c["data"]["feature_columns"].pop(),
-            lambda c: c["data"]["feature_columns"].append("leak_feature"),
-            lambda c: c["data"]["feature_columns"].__setitem__(0, LEAKY),
+            lambda c: c["data"].update({"feature_columns": []}),
+            lambda c: c["data"].update({"feature_columns": None}),
+            lambda c: c["data"].update({"feature_columns": "events_30d"}),
+            lambda c: c["data"]["feature_columns"].append(" "),
+            lambda c: c["data"]["feature_columns"].append(1),
+            lambda c: c["data"]["feature_columns"].append(FEATURE_COLUMNS[0]),
+            lambda c: c["data"]["feature_columns"].append(KEY),
+            lambda c: c["data"]["feature_columns"].append(TARGET),
+            lambda c: c["data"]["feature_columns"].append(LEAKY),
         )
         for mutate in mutations:
             with self.subTest(mutate=mutate):
@@ -660,6 +657,48 @@ class TestEvaluate(PipelineFixture):
 class TestRunPipeline(PipelineFixture):
     def _run(self) -> dict:
         return pipeline.run_pipeline(str(self.config_path))
+
+    def test_configured_features_used_throughout_pipeline(self) -> None:
+        self.features["custom_numeric"] = np.arange(len(self.features), dtype=float)
+        self.write_inputs()
+        selections = (
+            list(reversed(FEATURE_COLUMNS)),
+            [FEATURE_COLUMNS[5], FEATURE_COLUMNS[0]],
+            ["custom_numeric", FEATURE_COLUMNS[3]],
+            ["custom_numeric"],
+        )
+        for selected in selections:
+            with self.subTest(selected=selected):
+                self.write_config(lambda c: c["data"].update({"feature_columns": selected}))
+                config = self.load_config()
+                frame = pipeline.load_data(config)
+                self.assertEqual(list(frame.columns), [KEY, *selected, TARGET])
+                splits = pipeline.preprocess(frame, config)
+                self.assertEqual(splits["feature_columns"], selected)
+                for split in ("train", "val", "test"):
+                    self.assertEqual(list(splits[f"X_{split}"].columns), selected)
+                result = self._run()
+                features = json.loads(Path(result["artifacts"]["features"]).read_text())
+                manifest = json.loads(Path(result["artifacts"]["manifest"]).read_text())
+                self.assertEqual(features, selected)
+                self.assertEqual(manifest["features"], selected)
+                model = joblib.load(result["artifacts"]["model"])
+                self.assertEqual(
+                    model.named_steps["select_features"].transformers_[0][2], selected
+                )
+                self.assertEqual(model.named_steps["scale"].n_features_in_, len(selected))
+                # Для предсказания достаточно выбранных колонок, в любом порядке.
+                raw = self.features[list(reversed(selected))]
+                probabilities = model.predict_proba(raw)
+                self.assertEqual(probabilities.shape, (len(self.features), 2))
+                self.assertTrue(np.isfinite(probabilities).all())
+                self.assertTrue(result["reload_check"]["passed"])
+
+    def test_missing_configured_feature_rejected(self) -> None:
+        self.write_config(lambda c: c["data"]["feature_columns"].append("missing_numeric"))
+        config = self.load_config()
+        with self.assertRaisesRegex(ValueError, "missing_numeric"):
+            pipeline.load_data(config)
 
     def test_artifacts_written_next_to_config(self) -> None:
         result = self._run()

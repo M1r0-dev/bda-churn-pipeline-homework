@@ -46,19 +46,6 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
 logger = logging.getLogger(__name__)
 
-# Фиксированный whitelist из отчёта HW5: порядок колонок — как в parquet.
-FEATURE_COLUMNS = (
-    "traffic_gb_30d",
-    "traffic_change_ratio",
-    "voice_minutes_30d",
-    "events_30d",
-    "active_days_30d",
-    "recency_days",
-    "roaming_share_30d",
-    "tickets_30d",
-    "unresolved_share_30d",
-    "network_error_rate_30d",
-)
 DEFAULT_CONFIG_NAME = "config.json"
 SPLIT_NAMES = ("train", "val", "test")
 _REQUIRED_SECTIONS = ("data", "preprocessing", "model", "evaluation", "artifacts", "logging")
@@ -146,20 +133,31 @@ def _require_int(value, name: str, minimum: int | None = None) -> int:
     return value
 
 
-def _validate_whitelist(config: dict) -> None:
+def _feature_columns(config: dict) -> list[str]:
+    """Получить упорядоченный список признаков из конфигурации и проверить его."""
     data = config.get("data") if isinstance(config, dict) else None
     if not isinstance(data, dict):
         raise ValueError("В конфигурации отсутствует секция 'data'")
     feature_columns = data.get("feature_columns")
-    if not isinstance(feature_columns, list) or not all(
+    if not isinstance(feature_columns, list) or not feature_columns or not all(
         isinstance(column, str) and column.strip() for column in feature_columns
     ):
-        raise ValueError("'data.feature_columns' должен быть списком непустых строк")
-    if list(feature_columns) != list(FEATURE_COLUMNS):
-        raise ValueError(
-            "Фиксированный whitelist 10 признаков HW5 изменён: "
-            f"ожидалось {list(FEATURE_COLUMNS)}, получено {feature_columns}"
-        )
+        raise ValueError("'data.feature_columns' должен быть непустым списком непустых строк")
+    if len(set(feature_columns)) != len(feature_columns):
+        raise ValueError("'data.feature_columns' содержит дубликаты")
+    if data.get("key_column") in feature_columns:
+        raise ValueError("Ключ 'data.key_column' не может быть признаком модели")
+    if data.get("target_column") in feature_columns:
+        raise ValueError("Целевая переменная 'data.target_column' не может быть признаком модели")
+    excluded = data.get("excluded_columns")
+    if not isinstance(excluded, list) or not all(
+        isinstance(column, str) and column.strip() for column in excluded
+    ):
+        raise ValueError("'data.excluded_columns' должен быть списком непустых строк")
+    overlap = sorted(set(excluded) & set(feature_columns))
+    if overlap:
+        raise ValueError(f"'data.excluded_columns' пересекается с признаками: {overlap}")
+    return list(feature_columns)
 
 
 def _validate_config(config: dict) -> None:
@@ -182,24 +180,12 @@ def _validate_config(config: dict) -> None:
     _require_str(data["churn_path"], "data.churn_path")
     key_column = _require_str(data["key_column"], "data.key_column")
     target_column = _require_str(data["target_column"], "data.target_column")
-    _validate_whitelist(config)
-    feature_columns = list(data["feature_columns"])
-    if key_column in feature_columns:
-        raise ValueError("Ключ 'data.key_column' не может быть признаком модели")
-    if target_column in feature_columns:
-        raise ValueError("Целевая переменная 'data.target_column' не может быть признаком модели")
+    _feature_columns(config)
     if target_column == key_column:
         raise ValueError("Ключ и целевая переменная должны различаться")
     excluded = data["excluded_columns"]
-    if not isinstance(excluded, list) or not all(
-        isinstance(column, str) and column.strip() for column in excluded
-    ):
-        raise ValueError("'data.excluded_columns' должен быть списком непустых строк")
     if key_column in excluded:
         raise ValueError("Ключ нельзя исключать из признаков: он нужен для splits.csv")
-    overlap = sorted(set(excluded) & set(feature_columns))
-    if overlap:
-        raise ValueError(f"'data.excluded_columns' пересекается с признаками: {overlap}")
 
     preprocessing = config["preprocessing"]
     test_size = _require_number(preprocessing["test_size"], "preprocessing.test_size")
@@ -353,7 +339,7 @@ def _validate_keys(frame: pd.DataFrame, key_column: str, label: str) -> None:
 
 def _load_inputs(config: dict) -> tuple[pd.DataFrame, dict]:
     """Прочитать признаки и эталон, проверить контракт и вернуть данные + метаданные."""
-    _validate_whitelist(config)
+    feature_columns = _feature_columns(config)
     data = config["data"]
     key_column = data["key_column"]
     target_column = data["target_column"]
@@ -372,10 +358,10 @@ def _load_inputs(config: dict) -> tuple[pd.DataFrame, dict]:
     _validate_keys(truth, key_column, "эталоне")
     if target_column not in truth.columns:
         raise ValueError(f"В эталоне нет целевой колонки '{target_column}'")
-    missing = [column for column in FEATURE_COLUMNS if column not in features.columns]
+    missing = [column for column in feature_columns if column not in features.columns]
     if missing:
-        raise ValueError(f"В признаках нет колонок из фиксированного whitelist: {missing}")
-    for column in FEATURE_COLUMNS:
+        raise ValueError(f"В признаках нет колонок из 'data.feature_columns': {missing}")
+    for column in feature_columns:
         series = features[column]
         if pd.api.types.is_bool_dtype(series) or not pd.api.types.is_numeric_dtype(series):
             raise ValueError(f"Признак '{column}' должен быть числовым, dtype={series.dtype}")
@@ -385,13 +371,13 @@ def _load_inputs(config: dict) -> tuple[pd.DataFrame, dict]:
     dropped = [
         column
         for column in features.columns
-        if column != key_column and column not in FEATURE_COLUMNS
+        if column != key_column and column not in feature_columns
     ]
     if dropped:
         logger.warning(
             "Из признаков исключены служебные/лишние колонки: %s", dropped
         )
-    features = features[[key_column, *FEATURE_COLUMNS]]
+    features = features[[key_column, *feature_columns]]
 
     target_values = truth[target_column]
     if target_values.isna().any():
@@ -432,7 +418,7 @@ def _load_inputs(config: dict) -> tuple[pd.DataFrame, dict]:
     logger.info(
         "Загружено %d строк; признаков: %d; доля оттока %.4f",
         len(merged),
-        len(FEATURE_COLUMNS),
+        len(feature_columns),
         float(merged[target_column].mean()),
     )
     metadata = {
@@ -466,11 +452,11 @@ def preprocess(frame: pd.DataFrame, config: dict) -> dict:
     Признаки остаются «сырыми» (с NaN/inf): их обрабатывает сам sklearn
     Pipeline при обучении, поэтому заполнение и scaler не видят val/test.
     """
-    _validate_whitelist(config)
+    feature_columns = _feature_columns(config)
     data = config["data"]
     key_column = data["key_column"]
     target_column = data["target_column"]
-    for column in (key_column, target_column, *FEATURE_COLUMNS):
+    for column in (key_column, target_column, *feature_columns):
         if column not in frame.columns:
             raise ValueError(f"В данных нет колонки '{column}'")
 
@@ -481,7 +467,7 @@ def preprocess(frame: pd.DataFrame, config: dict) -> dict:
             f"Метка '{target_column}' должна содержать оба класса 0/1, найдено: {classes}"
         )
     y = y.astype(int)
-    X = frame[list(FEATURE_COLUMNS)]
+    X = frame[feature_columns]
     preparation = config["preprocessing"]
     X_train, X_holdout, y_train, y_holdout = train_test_split(
         X,
@@ -515,7 +501,7 @@ def preprocess(frame: pd.DataFrame, config: dict) -> dict:
         sizes["train"],
         sizes["val"],
         sizes["test"],
-        len(FEATURE_COLUMNS),
+        len(feature_columns),
     )
     return {
         "X_train": X_train,
@@ -528,7 +514,7 @@ def preprocess(frame: pd.DataFrame, config: dict) -> dict:
         "val_index": X_val.index,
         "test_index": X_test.index,
         "split_table": split_table[[key_column, "split"]],
-        "feature_columns": list(FEATURE_COLUMNS),
+        "feature_columns": feature_columns,
         "random_state": int(preparation["random_state"]),
         "test_size": float(preparation["test_size"]),
         "val_size": float(preparation["val_size"]),
@@ -558,7 +544,7 @@ def _build_pipeline(config: dict) -> Pipeline:
                     transformers=[(
                         "features",
                         FunctionTransformer(pd.DataFrame.astype, kw_args={"dtype": "float64"}),
-                        list(FEATURE_COLUMNS),
+                        _feature_columns(config),
                     )],
                     remainder="drop",
                     verbose_feature_names_out=False,
@@ -745,7 +731,7 @@ def _build_manifest(
             "config_sha256": _sha256_file(Path(config["_config_path"])),
         },
         "environment": _environment_versions(),
-        "features": list(FEATURE_COLUMNS),
+        "features": _feature_columns(config),
         "model": {
             "estimator": "RandomForestClassifier",
             "params": dict(config["model"]),
@@ -799,7 +785,7 @@ def run_pipeline(config_path) -> dict:
 
     logger.info("Шаг 5/7: сохранение модели, признаков и сплитов")
     _atomic_write_joblib(artifact_paths["model"], model)
-    _atomic_write_json(artifact_paths["features"], list(FEATURE_COLUMNS))
+    _atomic_write_json(artifact_paths["features"], splits["feature_columns"])
     split_table = splits["split_table"]
     _atomic_write_csv(artifact_paths["splits"], split_table)
 
